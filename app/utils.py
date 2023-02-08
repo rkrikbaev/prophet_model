@@ -7,8 +7,8 @@ TRACKING_SERVER = os.environ.get('TRACKING_SERVER')
 
 def get_logger(name='root', loglevel='INFO'):
 
-  LOG_PATH  = os.path.join(os.getcwd(), 'logs')
-  LOG_PATH = "/logs"
+ # LOG_PATH  = os.path.join(os.getcwd(), 'logs')
+ # LOG_PATH = "/logs"
  # if not os.path.exists(LOG_PATH):
  #   os.makedirs(LOG_PATH)
   logger = logging.getLogger(name)
@@ -32,10 +32,10 @@ def get_logger(name='root', loglevel='INFO'):
     terminal_handler.setFormatter(formatter)
     logger.addHandler(terminal_handler)
 
-    file_handler = RotatingFileHandler(filename=f'app/{LOG_PATH}/log.log', mode='a', encoding=None, delay=False, maxBytes=5*1024*1024, backupCount=2)
-    file_handler.setLevel(logging.ERROR)
-    file_handler.setFormatter(formatter)
-    logger.addHandler(file_handler)
+#    file_handler = RotatingFileHandler(filename=f'{LOG_PATH}/log.log', mode='a', encoding=None, delay=False, maxBytes=5*1024*1024, backupCount=2)
+#    file_handler.setLevel(logging.ERROR)
+#    file_handler.setFormatter(formatter)
+#    logger.addHandler(file_handler)
 
     if logger.name == 'root':
       logger.warning('Running: %s %s',

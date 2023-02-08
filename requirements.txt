@@ -3,3 +3,4 @@ jsonschema
 pydotenv==0.0.7
 pytest
 mlflow
+prophet==1.1.2

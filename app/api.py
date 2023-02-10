@@ -19,12 +19,9 @@ class Action:
     def on_post(self, req, resp):
 
         request = req.media
-        logger.debug(f'Request from the operator: {list(request.keys())}')
-
-        resp.status = falcon.HTTP_200
 
         response = {
-            "model_status": resp.status,
+            "model_status": None,
             "prediction": None,
             "model_uri": None,
             "anomalies": None,
@@ -49,8 +46,11 @@ class Action:
                 response["prediction"] = result
                 response["model_uri"] = model_uri
                 response["anomalies"] = None
-
-            logger.debug(f'Model response: {response}')
+            else:
+                text = 'Not all fields are present in request JSON'
+                logger.error(text)
+                response['model_status'] = text
+                resp.status = falcon.HTTP_422
 
         except Exception as exc:
 

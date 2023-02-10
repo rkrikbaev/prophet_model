@@ -51,7 +51,7 @@ class Model(object):
             if isinstance(period, list):
                 df_period = self.prepare_dataset(period, columns=['ds'])
             else:
-                df_period = self.generate_dataset(self.model, granularity, output_window)
+                df_period = self.generate_dataset(freq=granularity, periods=output_window)
             
             result = self.model.predict(df_period)     
             result['ds'] = result[['ds']].apply(lambda x: x[0].timestamp()*1000, axis=1).astype(int)
@@ -65,9 +65,13 @@ class Model(object):
             raise RuntimeError('Cannot fit model')
         
     
-    def generate_dataset(self, m, granularity, output_window=24)->pd.DataFrame():
+    def generate_dataset(self, freq=3600, periods=24)->pd.DataFrame():
 
-        df = Prophet.make_future_dataframe(m, periods=output_window, freq=granularity, include_history = False)
+        freq = f'{freq}S'
+
+        df = Prophet.make_future_dataframe(self.model, periods, freq, include_history = False)
+        logger.debug(f'generate future dataset shape: {df.shape}')
+
         return df
 
     def fit_model(self, df, config=None):

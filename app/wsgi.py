@@ -1,15 +1,15 @@
-from app import api
+from api import api
 import os
 
-from helper import get_logger
-logger = get_logger(__name__, loglevel='DEBUG')
+import utils
+logger = utils.get_logger(__name__, loglevel='DEBUG')
 
 # --------- For local debugging/test only ----------
 from wsgiref.simple_server import make_server
 
 if __name__ == "__main__":
 
-    app_port = os.getenv('MODEL_PORT', default=8005)
+    app_port = os.getenv('MODEL_PORT', default=8007)
 
     with make_server("", int(app_port), api) as httpd:
         logger.debug(f"Listening Port {app_port}...")

@@ -54,16 +54,21 @@ class Model(object):
                 df_period = self.generate_dataset(freq=granularity, periods=output_window)
             
             result = self.model.predict(df_period)     
-            result['ds'] = result[['ds']].apply(lambda x: x[0].timestamp()*1000, axis=1).astype(int)
-
-            v = result[['ds', 'yhat']].values.tolist()
-            series = list(map(lambda x: [int(x[0]), x[1]], v))
+ 
+            series = self.to_series(df=result)
 
             logger.debug(f"Series shape: ({len(series)}, {len(series[0])})")
             return series
         else:
             raise RuntimeError('Cannot fit model')
-        
+
+    def to_series(self, df)->list:
+            
+        df['ds'] = df[['ds']].apply(lambda x: x[0].timestamp(), axis=1).astype(int)
+
+        v = df[['ds', 'yhat']].values.tolist()  
+
+        return list(map(lambda x: [int(x[0]), x[1]], v))      
     
     def generate_dataset(self, freq=3600, periods=24)->pd.DataFrame():
 

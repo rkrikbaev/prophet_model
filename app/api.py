@@ -2,7 +2,7 @@ import falcon
 import sys
 
 from model import Model
-from utils import get_logger, LOG_LEVEL
+from utils import get_logger, LOG_LEVEL, TRACKING_SERVER
 
 logger = get_logger(__name__, loglevel=LOG_LEVEL)
 
@@ -19,46 +19,32 @@ class Action:
     def on_post(self, req, resp):
 
         request = req.media
+        logger.debug(request)
         logger.debug(f'Request from the operator: {list(request.keys())}')
 
         resp.status = falcon.HTTP_200
 
         response = {
             "model_status": resp.status,
-            "prediction": None,
+            "result": None,
             "model_uri": None,
-            "anomalies": None,
-            "model_uri": None
+            "anomalies": None
             }
 
-        required_fields = {'model_config', 'dataset', 'model_uri', 'metadata', 'period'}
-        keys = set(request.keys())
+        config = request.get('model_config')
+        data = request.get('dataset')
+        model_uri = request.get('model_uri')
+        period = request.get('period')
 
-        try:
+        result = self.model.run(data, config, period)
 
-            if required_fields == keys:
+        response["result"] = result
+        response["model_uri"] = model_uri
+        response["anomalies"] = None
 
-                config = request.get('model_config')
+        logger.debug(f'Model response: {response}')
 
-                data = request.get('dataset')
-                period = request.get('period')
-                model_uri = request.get('model_uri')
-
-                result = self.model.run(data, period, config)
-
-                response["prediction"] = result
-                response["model_uri"] = model_uri
-                response["anomalies"] = None
-
-            logger.debug(f'Model response: {response}')
-
-        except Exception as exc:
-
-            response['model_status'] = falcon.HTTP_500
-            logger.debug(f'Service error: {exc}')
-
-        finally:
-            resp.media = response
+        resp.media = response
 
 api = falcon.App()
 

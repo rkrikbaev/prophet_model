@@ -29,19 +29,11 @@ class Model(object):
 
         self.model = None
 
-    def run(self, dataset, period, config):
-
-        # dataset = data.get('dataset')
-        # period = data.get('period')
-
-        # config = data.get('model_config')
+    def run(self, dataset, config, period=None, model_uri=None):
 
         input_window = config.pop('input_window', None)
-        if not input_window: raise RuntimeError('input_window is empty')
         output_window = config.pop('output_window', None)
-        if not output_window: raise RuntimeError('output_window is empty')
         granularity = config.pop('granularity', None)
-        if not granularity: raise RuntimeError('granularity is empty')
 
         if isinstance(dataset, list):
             df_dataset = self.prepare_dataset(dataset, columns=['ds', 'y'])
@@ -54,21 +46,16 @@ class Model(object):
                 df_period = self.generate_dataset(freq=granularity, periods=output_window)
             
             result = self.model.predict(df_period)     
- 
-            series = self.to_series(df=result)
+            result['ds'] = result[['ds']].apply(lambda x: x[0].timestamp(), axis=1).astype(int)
+
+            v = result[['ds', 'yhat']].values.tolist()
+            series = list(map(lambda x: [int(x[0]), x[1]], v))
 
             logger.debug(f"Series shape: ({len(series)}, {len(series[0])})")
             return series
         else:
             raise RuntimeError('Cannot fit model')
-
-    def to_series(self, df)->list:
-            
-        df['ds'] = df[['ds']].apply(lambda x: x[0].timestamp(), axis=1).astype(int)
-
-        v = df[['ds', 'yhat']].values.tolist()  
-
-        return list(map(lambda x: [int(x[0]), x[1]], v))      
+        
     
     def generate_dataset(self, freq=3600, periods=24)->pd.DataFrame():
 
